@@ -52,7 +52,6 @@ interface NewPostForm {
   author: string
 }
 
-// Initialize form data
 const form = ref<NewPostForm>({
   title: '',
   subtitle: '',
@@ -67,13 +66,10 @@ const form = ref<NewPostForm>({
 
 const createPost = async () => {
   try {
-    // Call the store action to create a new post.
     const newPost = await postsStore.createPost(form.value)
-    // Redirect to the new post's detail page.
     router.push(`/post/${newPost.id}`)
   } catch (error) {
     console.error('Error creating post:', error)
-    // Optionally, add error handling or notification logic here.
   }
 }
 </script>

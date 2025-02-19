@@ -14,7 +14,6 @@
       <span>Author: {{ post.author }}</span>
     </div>
     
-    <!-- Show Edit/Delete buttons if the logged-in user is the creator -->
     <div v-if="isCreator" class="mt-4">
       <button @click="editPost" class="mr-4 bg-green-500 text-white px-3 py-1 rounded">Edit</button>
       <button @click="deletePost" class="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
@@ -29,7 +28,7 @@
 import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usePostsStore } from '@/stores/posts'
-import { useAuthStore } from '@/stores/auth'  // Assuming you have a user store
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
 const router = useRouter()
@@ -38,14 +37,12 @@ const authStore = useAuthStore()
 
 const postId = Number(route.params.id)
 
-// Ensure posts are loaded
 onMounted(async () => {
   if (!postsStore.posts.length) {
     await postsStore.fetchPosts()
   }
 })
 
-// Retrieve the post from the store
 const post = computed(() => postsStore.posts.find(p => p.id === postId))
 
 const isCreator = computed(() => {
@@ -54,13 +51,12 @@ const isCreator = computed(() => {
 })
 
 const editPost = () => {
-  // Navigate to an edit form page for this post
   router.push(`/edit-post/${postId}`)
 }
 
 const deletePost = async () => {
   try {
-    await postsStore.deletePost(postId) // Ensure your store has a deletePost action that sends the token
+    await postsStore.deletePost(postId)
     router.push('/posts')
   } catch (error) {
     console.error('Error deleting post:', error)

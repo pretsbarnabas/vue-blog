@@ -1,4 +1,3 @@
-<!-- src/views/ProfileView.vue -->
 <template>
     <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md mx-auto space-y-8">
@@ -9,7 +8,6 @@
                 </div>
 
                 <div v-if="authStore.user" class="space-y-6">
-                    <!-- Alap profil adatok -->
                     <div v-if="!isEditing" class="space-y-4">
                         <div class="flex flex-col space-y-1">
                             <span class="text-sm text-gray-500">Név</span>
@@ -33,7 +31,6 @@
                         </div>
                     </div>
 
-                    <!-- Profil szerkesztés űrlap -->
                     <form v-if="isEditing && !isChangingPassword" @submit.prevent="handleProfileUpdate"
                         class="space-y-4">
                         <div>
@@ -65,7 +62,6 @@
                         </div>
                     </form>
 
-                    <!-- Jelszó módosítás űrlap -->
                     <form v-if="isChangingPassword" @submit.prevent="handlePasswordChange" class="space-y-4">
                         <div>
                             <label for="current-password" class="block text-sm font-medium text-gray-700">Jelenlegi
@@ -98,7 +94,6 @@
                     </form>
                 </div>
 
-                <!-- Kijelentkezés gomb -->
                 <div class="flex justify-center pt-8">
                     <button @click="handleLogout"
                         class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
@@ -123,19 +118,16 @@ const isChangingPassword = ref(false)
 const isLoading = ref(false)
 const error = ref('')
 
-// Profil szerkesztés form
 const editForm = ref({
     name: authStore.user?.name || '',
     email: authStore.user?.email || ''
 })
 
-// Jelszó módosítás form
 const passwordForm = ref({
     currentPassword: '',
     newPassword: ''
 })
 
-// Profil szerkesztés funkciók
 const startEditing = () => {
     editForm.value = {
         name: authStore.user?.name || '',
@@ -170,7 +162,6 @@ const handleProfileUpdate = async () => {
     }
 }
 
-// Jelszó módosítás funkciók
 const startPasswordChange = () => {
     passwordForm.value = {
         currentPassword: '',

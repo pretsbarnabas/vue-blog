@@ -27,11 +27,9 @@ import { usePostsStore } from '@/stores/posts'
 
 const postsStore = usePostsStore()
 
-// Fetch all posts when the component mounts.
 onMounted(() => {
   postsStore.fetchPosts()
 })
 
-// Use the store's getter to access the latest posts.
 const latestPosts = computed(() => postsStore.latestPosts)
 </script>

@@ -1,7 +1,6 @@
 <template>
   <div class="container mx-auto px-4 py-6">
     <h1 class="text-3xl font-bold my-4">All Posts</h1>
-    <!-- Search Bar -->
     <div class="mb-4 flex">
       <input 
         type="text" 
@@ -14,7 +13,6 @@
       </button>
     </div>
     
-    <!-- Posts Grid -->
     <div 
       v-if="postsToShow.length > 0" 
       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
@@ -53,17 +51,14 @@ import type { Post } from '@/types'
 const postsStore = usePostsStore()
 const query = ref('')
 
-// Load all posts on mount
 onMounted(async () => {
   await postsStore.fetchPosts()
 })
 
-// Compute filtered posts using the store's getter
 const postsToShow = computed<Post[]>(() => {
   return postsStore.filteredPosts(query.value)
 })
 
-// Clear the search query (shows all posts)
 const clearSearch = () => {
   query.value = ''
 }

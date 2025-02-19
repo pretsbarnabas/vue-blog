@@ -69,7 +69,6 @@ export const usePostsStore = defineStore('posts', {
       const cats = state.posts.map(post => post.category).filter(c => c)
       return Array.from(new Set(cats))
     },
-    // New getter: returns a function that filters posts by title
     filteredPosts: (state) => {
       return (query: string) => {
         if (!query.trim()) return state.posts

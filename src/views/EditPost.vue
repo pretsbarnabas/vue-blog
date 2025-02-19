@@ -76,7 +76,6 @@
   
   const postId = Number(route.params.id)
   
-  // Define the form structure
   const form = ref({
     title: '',
     subtitle: '',
@@ -86,7 +85,6 @@
     category: '',
   })
   
-  // When the component mounts, pre-fill the form with the current post data
   onMounted(async () => {
     if (!postsStore.posts.length) {
       await postsStore.fetchPosts()
@@ -104,7 +102,6 @@
         email: post.email
       }
     } else {
-      // Optionally, redirect or show a "post not found" message
       router.push('/posts')
     }
   })
@@ -113,11 +110,9 @@
   const updatePostHandler = async () => {
     try {
       await postsStore.updatePost(postId, form.value)
-      // Redirect to the post detail page after successful update
       router.push(`/post/${postId}`)
     } catch (error) {
       console.error('Error updating post:', error)
-      // Optionally, display an error notification to the user
     }
   }
   </script>
