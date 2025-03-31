@@ -1,67 +1,107 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import type { RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import HomeView from '@/views/HomeView.vue'
-import PostPage from "@/views/PostPage.vue"
-import CategoriesPage from "@/views/CategoriesPage.vue"
-import CategoryPostsPage from "@/views/CategoryPostsPage.vue"
-import NewPostPage from "@/views/NewPost.vue"
-import AllPosts from '@/views/AllPosts.vue'
-import EditPost from "@/views/EditPost.vue"
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('../views/LoginView.vue'),
-    meta: { requiresGuest: true },
+    component: () => import('@/views/LoginView.vue'),
+    meta: { 
+      requiresGuest: true,
+      layout: 'AuthLayout' 
+    },
   },
   {
     path: '/register',
     name: 'Register',
-    component: () => import('../views/RegisterView.vue'),
-    meta: { requiresGuest: true },
+    component: () => import('@/views/RegisterView.vue'),
+    meta: { 
+      requiresGuest: true,
+      layout: 'AuthLayout'
+    },
   },
   {
     path: '/profile',
     name: 'Profile',
-    component: () => import('../views/ProfileView.vue'),
-    meta: { requiresAuth: true },
+    component: () => import('@/views/ProfileView.vue'),
+    meta: { 
+      requiresAuth: true,
+      title: 'User Profile' 
+    },
   },
-  { path: '/categories', name: 'Categories', component: CategoriesPage },
-  { path: '/categories/:category', name: 'CategoryPosts', component: CategoryPostsPage },
-  { path: '/post/:id', name: 'Post', component: PostPage },
+  { 
+    path: '/categories', 
+    name: 'Categories', 
+    component: () => import('@/views/CategoriesPage.vue'),
+    meta: { title: 'Categories' }
+  },
+  { 
+    path: '/categories/:category', 
+    name: 'CategoryPosts', 
+    component: () => import('@/views/CategoryPostsPage.vue'),
+    props: true 
+  },
+  { 
+    path: '/post/:id', 
+    name: 'Post', 
+    component: () => import('@/views/PostPage.vue'),
+    props: true
+  },
   {
     path: '/',
     name: 'home',
-    component: HomeView,
+    component: () => import('@/views/HomeView.vue'),
+    meta: { title: 'Home' }
   },
-  { path: '/new-post', name: 'NewPost', component: NewPostPage, meta: {requiresAuth:true} },
-  { path: '/posts', name: 'AllPosts', component: AllPosts },
-  { path: '/edit-post/:id', name: 'EditPost', component: EditPost, meta: {requiresAuth:true} }
+  { 
+    path: '/new-post', 
+    name: 'NewPost', 
+    component: () => import('@/views/NewPost.vue'),
+    meta: {
+      requiresAuth: true,
+      title: 'Create New Post'
+    } 
+  },
+  { 
+    path: '/posts', 
+    name: 'AllPosts', 
+    component: () => import('@/views/AllPosts.vue'),
+    meta: { title: 'All Posts' }
+  },
+  { 
+    path: '/edit-post/:id', 
+    name: 'EditPost', 
+    component: () => import('@/views/EditPost.vue'),
+    meta: {
+      requiresAuth: true,
+      title: 'Edit Post'
+    },
+    props: true
+  }
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/'), 
   routes,
+  scrollBehavior(to, from, savedPosition) {
+    return savedPosition || { top: 0 }
+  }
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to) => {
   const authStore = useAuthStore()
-
-  // Védett útvonal kezelése
+  
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next('/login')
-    return
+    return '/login'
   }
 
-  // Vendég útvonal kezelése (pl. login oldal)
   if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    next('/profile')
-    return
+    return '/profile'
   }
 
-  next()
+  if (to.meta.title) {
+    document.title = `${to.meta.title} | Blog`
+  }
 })
 
 export default router

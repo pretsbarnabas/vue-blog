@@ -1,46 +1,89 @@
 <template>
-  <div class="container mx-auto px-4 py-6">
-    <h1 class="text-3xl font-bold my-4">All Posts</h1>
-    <div class="mb-4 flex">
-      <input 
-        type="text" 
-        v-model="query" 
-        placeholder="Search posts by title..." 
-        class="flex-grow border px-4 py-2 mr-2" 
-      />
-      <button @click="clearSearch" class="bg-gray-500 text-white px-4 py-2 ml-2">
-        Clear
-      </button>
-    </div>
-    
-    <div 
-      v-if="postsToShow.length > 0" 
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-    >
-      <div 
-        v-for="post in postsToShow" 
-        :key="post.id" 
-        class="border rounded p-4 shadow hover:shadow-lg transition duration-200"
+  <v-container>
+    <v-row class="mb-4">
+      <v-col cols="12">
+        <v-card-title class="text-h3 font-weight-bold">All Posts</v-card-title>
+      </v-col>
+    </v-row>
+
+    <v-row class="mb-6">
+      <v-col cols="12" sm="10">
+        <v-text-field
+          v-model="query"
+          placeholder="Search posts by title..."
+          variant="outlined"
+          clearable
+          @click:clear="clearSearch"
+          hide-details
+        ></v-text-field>
+      </v-col>
+      <v-col cols="12" sm="2">
+        <v-btn
+          @click="clearSearch"
+          color="grey-darken-1"
+          variant="flat"
+          block
+          height="56"
+        >
+          Clear
+        </v-btn>
+      </v-col>
+    </v-row>
+
+    <v-row v-if="postsToShow.length > 0">
+      <v-col
+        v-for="post in postsToShow"
+        :key="post.id"
+        cols="12"
+        sm="6"
+        md="4"
       >
-        <img 
-          v-if="post.picture" 
-          :src="post.picture" 
-          alt="Post image" 
-          class="w-full h-48 object-cover rounded mb-2"
-        />
-        <h2 class="text-xl font-semibold">{{ post.title }}</h2>
-        <p class="text-gray-600">{{ post.description }}</p>
-        <div class="mt-2">
-          <router-link :to="`/post/${post.id}`" class="text-blue-500 hover:underline">
-            Read More
-          </router-link>
-        </div>
-      </div>
-    </div>
-    <div v-if="postsToShow.length === 0" class="text-gray-500">
-      No posts found.
-    </div>
-  </div>
+        <v-card
+          class="h-100"
+          hover
+          :to="`/post/${post.id}`"
+        >
+          <v-img
+            v-if="post.picture"
+            :src="post.picture"
+            :alt="post.title"
+            height="200"
+            cover
+            class="align-end"
+          >
+            <v-card-title class="text-white text-shadow">
+              {{ post.title }}
+            </v-card-title>
+          </v-img>
+          <v-card-text>
+            <p class="text-body-1 text-grey-darken-1">
+              {{ post.description }}
+            </p>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn
+              color="primary"
+              variant="text"
+              :to="`/post/${post.id}`"
+            >
+              Read More
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <v-row v-else>
+      <v-col cols="12">
+        <v-alert
+          type="info"
+          variant="tonal"
+        >
+          No posts found.
+        </v-alert>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -63,3 +106,15 @@ const clearSearch = () => {
   query.value = ''
 }
 </script>
+
+<style scoped>
+.text-shadow {
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+}
+.v-card {
+  transition: all 0.3s ease;
+}
+.v-card:hover {
+  transform: translateY(-5px);
+}
+</style>

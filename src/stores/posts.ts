@@ -1,81 +1,75 @@
-// src/stores/posts.ts
 import { defineStore } from 'pinia'
-import axios from 'axios'
-import { Post } from '@/types'
+import api from "@/main"
+import type { Post } from '@/types'
+import { reactive, computed, toRefs } from 'vue'
 
-export const usePostsStore = defineStore('posts', {
-  state: () => ({
+export const usePostsStore = defineStore('posts', () => {
+  const state = reactive({
     posts: [] as Post[],
-  }),
-  actions: {
-    async fetchPosts() {
-      try {
-        const { data } = await axios.get<Post[]>('http://localhost:3000/posts')
-        this.posts = data
-      } catch (error) {
-        console.error('Error fetching posts:', error)
+    loading: false,
+    error: null as string | null
+  })
+
+  const latestPosts = computed(() => 
+    [...state.posts].sort((a, b) => b.id - a.id).slice(0, 6))
+  
+  const uniqueCategories = computed(() => 
+    Array.from(new Set(state.posts.map(post => post.category).filter(Boolean))))
+
+  const filteredPosts = computed(() => (query: string) => 
+    query.trim() 
+      ? state.posts.filter(post => 
+          post.title.toLowerCase().includes(query.toLowerCase()))
+      : state.posts)
+
+  const fetchPosts = async () => {
+    state.loading = true
+    try {
+      const { data } = await api.get<Post[]>('/posts')
+      state.posts = data
+    } catch (error) {
+      state.error = 'Failed to fetch posts'
+    } finally {
+      state.loading = false
+    }
+  }
+
+  const postAction = async <T>(
+    method: 'post' | 'put' | 'delete',
+    url: string,
+    data?: T
+  ) => {
+    state.loading = true
+    try {
+      const response = await api[method]<Post>(url, data)
+      if (method === 'delete') {
+        state.posts = state.posts.filter(p => p.id !== (data as any).id)
+      } else {
+        const index = state.posts.findIndex(p => p.id === response.data.id)
+        index === -1 
+          ? state.posts.push(response.data)
+          : state.posts.splice(index, 1, response.data)
       }
-    },
-    async createPost(newPostData: Omit<Post, 'id' | 'author' | 'authorId' | 'authorEmail'>) {
-      const token = localStorage.getItem('token')
-      try {
-        const { data } = await axios.post<Post>(
-          'http://localhost:3000/posts',
-          newPostData,
-          { headers: { Authorization: `Bearer ${token}` } }
-        )
-        this.posts.push(data)
-        return data
-      } catch (error) {
-        console.error('Error creating post:', error)
-        throw error
-      }
-    },
-    async updatePost(postId: number, updateData: Partial<Post>) {
-      const token = localStorage.getItem('token')
-      try {
-        const { data } = await axios.put<Post>(
-          `http://localhost:3000/posts/${postId}`,
-          updateData,
-          { headers: { Authorization: `Bearer ${token}` } }
-        )
-        const index = this.posts.findIndex(p => p.id === postId)
-        if (index !== -1) {
-          this.posts.splice(index, 1, data)
-        }
-        return data
-      } catch (error) {
-        console.error('Error updating post:', error)
-        throw error
-      }
-    },
-    async deletePost(postId: number) {
-      const token = localStorage.getItem('token')
-      try {
-        await axios.delete(`http://localhost:3000/posts/${postId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        this.posts = this.posts.filter(p => p.id !== postId)
-      } catch (error) {
-        console.error('Error deleting post:', error)
-        throw error
-      }
-    },
-  },
-  getters: {
-    latestPosts: state =>
-      [...state.posts].sort((a, b) => b.id - a.id).slice(0, 6),
-    uniqueCategories: state => {
-      const cats = state.posts.map(post => post.category).filter(c => c)
-      return Array.from(new Set(cats))
-    },
-    filteredPosts: (state) => {
-      return (query: string) => {
-        if (!query.trim()) return state.posts
-        return state.posts.filter(post =>
-          post.title.toLowerCase().includes(query.toLowerCase())
-        )
-      }
-    },
-  },
+      return response.data
+    } catch (error) {
+      state.error = `Failed to ${method} post`
+      throw error
+    } finally {
+      state.loading = false
+    }
+  }
+
+  return {
+    ...toRefs(state),
+    latestPosts,
+    uniqueCategories,
+    filteredPosts,
+    fetchPosts,
+    createPost: (newPost: Omit<Post, 'id'>) => 
+      postAction('post', '/posts', newPost),
+    updatePost: (id: number, updateData: Partial<Post>) => 
+      postAction('put', `/posts/${id}`, updateData),
+    deletePost: (id: number) => 
+      postAction('delete', `/posts/${id}`)
+  }
 })

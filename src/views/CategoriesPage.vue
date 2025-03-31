@@ -1,14 +1,34 @@
 <template>
-  <div class="container mx-auto px-4">
-    <h1 class="text-3xl font-bold my-4">Categories</h1>
-    <ul class="list-disc pl-6">
-      <li v-for="cat in uniqueCategories" :key="cat" class="my-2">
-        <router-link :to="`/categories/${cat}`" class="text-blue-500 hover:underline">
-          {{ cat }}
-        </router-link>
-      </li>
-    </ul>
-  </div>
+  <v-container>
+    <v-row>
+      <v-col cols="12">
+        <v-card-title class="text-h3 font-weight-bold">Categories</v-card-title>
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col cols="12" md="6">
+        <v-list lines="two" density="comfortable">
+          <v-list-item
+            v-for="category in uniqueCategories"
+            :key="category"
+            :to="`/categories/${category}`"
+            :title="category"
+            :value="category"
+            active-class="text-primary"
+          >
+            <template v-slot:prepend>
+              <v-icon icon="mdi-folder-outline"></v-icon>
+            </template>
+
+            <template v-slot:append>
+              <v-icon icon="mdi-chevron-right"></v-icon>
+            </template>
+          </v-list-item>
+        </v-list>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -23,3 +43,12 @@ onMounted(() => {
 
 const uniqueCategories = computed(() => postsStore.uniqueCategories)
 </script>
+
+<style scoped>
+.v-list-item {
+  transition: all 0.2s ease;
+}
+.v-list-item:hover {
+  transform: translateX(5px);
+}
+</style>

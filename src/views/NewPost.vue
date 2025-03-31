@@ -1,38 +1,77 @@
 <template>
-  <div class="container mx-auto px-4">
-    <h1 class="text-3xl font-bold my-4">Create New Post</h1>
-    <form @submit.prevent="createPost">
-      <div class="mb-4">
-        <label for="title" class="block mb-1 font-semibold">Title</label>
-        <input id="title" v-model="form.title" type="text" class="w-full border px-3 py-2" required />
-      </div>
-      <div class="mb-4">
-        <label for="subtitle" class="block mb-1 font-semibold">Subtitle</label>
-        <input id="subtitle" v-model="form.subtitle" type="text" class="w-full border px-3 py-2" />
-      </div>
-      <div class="mb-4">
-        <label for="description" class="block mb-1 font-semibold">Description</label>
-        <textarea id="description" v-model="form.description" class="w-full border px-3 py-2" rows="2"></textarea>
-      </div>
-      <div class="mb-4">
-        <label for="content" class="block mb-1 font-semibold">Content</label>
-        <textarea id="content" v-model="form.content" class="w-full border px-3 py-2" rows="6" required></textarea>
-      </div>
-      <div class="mb-4">
-        <label for="picture" class="block mb-1 font-semibold">Picture URL</label>
-        <input id="picture" v-model="form.picture" type="text" class="w-full border px-3 py-2" />
-      </div>
-      <div class="mb-4">
-        <label for="category" class="block mb-1 font-semibold">Category</label>
-        <input id="category" v-model="form.category" type="text" class="w-full border px-3 py-2" />
-      </div>
-      <button type="submit" class="bg-blue-500 text-white px-4 py-2">Create Post</button>
-    </form>
-  </div>
+  <v-container>
+    <v-row>
+      <v-col cols="12">
+        <v-card-title class="text-h3 font-weight-bold">Create New Post</v-card-title>
+      </v-col>
+    </v-row>
+
+    <v-card class="pa-6">
+      <v-form @submit.prevent="createPost">
+        <v-text-field
+          v-model="form.title"
+          label="Title"
+          variant="outlined"
+          :rules="[required]"
+          class="mb-4"
+        ></v-text-field>
+
+        <v-text-field
+          v-model="form.subtitle"
+          label="Subtitle"
+          variant="outlined"
+          class="mb-4"
+        ></v-text-field>
+
+        <v-textarea
+          v-model="form.description"
+          label="Description"
+          variant="outlined"
+          rows="2"
+          class="mb-4"
+        ></v-textarea>
+
+        <v-textarea
+          v-model="form.content"
+          label="Content"
+          variant="outlined"
+          rows="6"
+          :rules="[required]"
+          class="mb-4"
+        ></v-textarea>
+
+        <v-text-field
+          v-model="form.picture"
+          label="Picture URL"
+          variant="outlined"
+          class="mb-4"
+        ></v-text-field>
+
+        <v-text-field
+          v-model="form.category"
+          label="Category"
+          variant="outlined"
+          :items="postsStore.uniqueCategories"
+          class="mb-4"
+        ></v-text-field>
+
+        <div class="d-flex justify-end">
+          <v-btn
+            type="submit"
+            color="primary"
+            size="large"
+            :loading="loading"
+          >
+            Create Post
+          </v-btn>
+        </div>
+      </v-form>
+    </v-card>
+  </v-container>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { usePostsStore } from '@/stores/posts'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
@@ -40,7 +79,7 @@ import { useRouter } from 'vue-router'
 const postsStore = usePostsStore()
 const authStore = useAuthStore()
 const router = useRouter()
-
+const loading = ref(false)
 
 interface NewPostForm {
   title: string
@@ -50,6 +89,7 @@ interface NewPostForm {
   picture: string
   category: string
   author: string
+  email: string
 }
 
 const form = ref<NewPostForm>({
@@ -59,17 +99,27 @@ const form = ref<NewPostForm>({
   content: '',
   picture: '',
   category: '',
-  author: authStore.user.name,
-  email: authStore.user.email
+  author: authStore.user?.name || '',
+  email: authStore.user?.email || ''
 })
 
+const required = (value: string) => !!value || 'This field is required'
 
 const createPost = async () => {
   try {
+    loading.value = true
     const newPost = await postsStore.createPost(form.value)
     router.push(`/post/${newPost.id}`)
   } catch (error) {
     console.error('Error creating post:', error)
+  } finally {
+    loading.value = false
   }
 }
 </script>
+
+<style scoped>
+.v-card {
+  transition: all 0.3s ease;
+}
+</style>

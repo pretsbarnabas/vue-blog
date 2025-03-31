@@ -1,207 +1,260 @@
 <template>
-    <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md mx-auto space-y-8">
-            <!-- Profil információk -->
-            <div class="bg-white shadow-md rounded-lg p-8">
-                <div class="text-center mb-8">
-                    <h2 class="text-3xl font-extrabold text-gray-900">Profil</h2>
+    <v-container class="fill-height">
+      <v-row justify="center">
+        <v-col cols="12" sm="8" md="6">
+          <v-card class="pa-6">
+            <v-card-title class="text-center text-h3 mb-6">Profil</v-card-title>
+  
+            <template v-if="authStore.user">
+              <template v-if="!isEditing && !isChangingPassword">
+                <v-list lines="two">
+                  <v-list-item>
+                    <template v-slot:prepend>
+                      <v-icon icon="mdi-account"></v-icon>
+                    </template>
+                    <v-list-item-title>Név</v-list-item-title>
+                    <v-list-item-subtitle class="text-h6">{{ authStore.user.name }}</v-list-item-subtitle>
+                  </v-list-item>
+  
+                  <v-list-item>
+                    <template v-slot:prepend>
+                      <v-icon icon="mdi-email"></v-icon>
+                    </template>
+                    <v-list-item-title>Email</v-list-item-title>
+                    <v-list-item-subtitle class="text-h6">{{ authStore.user.email }}</v-list-item-subtitle>
+                  </v-list-item>
+                </v-list>
+  
+                <div class="d-flex justify-center mt-6">
+                  <v-btn
+                    @click="startEditing"
+                    color="primary"
+                    prepend-icon="mdi-pencil"
+                    class="mr-4"
+                  >
+                    Profil szerkesztése
+                  </v-btn>
+                  <v-btn
+                    @click="startPasswordChange"
+                    color="green"
+                    prepend-icon="mdi-lock"
+                  >
+                    Jelszó módosítása
+                  </v-btn>
                 </div>
-
-                <div v-if="authStore.user" class="space-y-6">
-                    <div v-if="!isEditing" class="space-y-4">
-                        <div class="flex flex-col space-y-1">
-                            <span class="text-sm text-gray-500">Név</span>
-                            <span class="text-lg font-medium text-gray-900">{{ authStore.user.name }}</span>
-                        </div>
-
-                        <div class="flex flex-col space-y-1">
-                            <span class="text-sm text-gray-500">Email</span>
-                            <span class="text-lg font-medium text-gray-900">{{ authStore.user.email }}</span>
-                        </div>
-
-                        <div class="flex justify-center space-x-4 pt-4">
-                            <button @click="startEditing"
-                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                Profil szerkesztése
-                            </button>
-                            <button @click="startPasswordChange"
-                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                                Jelszó módosítása
-                            </button>
-                        </div>
-                    </div>
-
-                    <form v-if="isEditing && !isChangingPassword" @submit.prevent="handleProfileUpdate"
-                        class="space-y-4">
-                        <div>
-                            <label for="edit-name" class="block text-sm font-medium text-gray-700">Név</label>
-                            <input id="edit-name" v-model="editForm.name" type="text" required
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
-                        </div>
-
-                        <div>
-                            <label for="edit-email" class="block text-sm font-medium text-gray-700">Email</label>
-                            <input id="edit-email" v-model="editForm.email" type="email" required
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
-                        </div>
-
-                        <div v-if="error" class="text-red-500 text-sm text-center" role="alert">
-                            {{ error }}
-                        </div>
-
-                        <div class="flex justify-center space-x-4 pt-4">
-                            <button type="submit"
-                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                :disabled="isLoading">
-                                {{ isLoading ? 'Mentés...' : 'Mentés' }}
-                            </button>
-                            <button type="button" @click="cancelEditing"
-                                class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                Mégse
-                            </button>
-                        </div>
-                    </form>
-
-                    <form v-if="isChangingPassword" @submit.prevent="handlePasswordChange" class="space-y-4">
-                        <div>
-                            <label for="current-password" class="block text-sm font-medium text-gray-700">Jelenlegi
-                                jelszó</label>
-                            <input id="current-password" v-model="passwordForm.currentPassword" type="password" required
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
-                        </div>
-
-                        <div>
-                            <label for="new-password" class="block text-sm font-medium text-gray-700">Új jelszó</label>
-                            <input id="new-password" v-model="passwordForm.newPassword" type="password" required
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
-                        </div>
-
-                        <div v-if="error" class="text-red-500 text-sm text-center" role="alert">
-                            {{ error }}
-                        </div>
-
-                        <div class="flex justify-center space-x-4 pt-4">
-                            <button type="submit"
-                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                                :disabled="isLoading">
-                                {{ isLoading ? 'Módosítás...' : 'Jelszó módosítása' }}
-                            </button>
-                            <button type="button" @click="cancelPasswordChange"
-                                class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                Mégse
-                            </button>
-                        </div>
-                    </form>
+              </template>
+  
+              <v-form v-if="isEditing && !isChangingPassword" @submit.prevent="handleProfileUpdate">
+                <v-text-field
+                  v-model="editForm.name"
+                  label="Név"
+                  variant="outlined"
+                  :rules="[required]"
+                  class="mb-4"
+                ></v-text-field>
+  
+                <v-text-field
+                  v-model="editForm.email"
+                  label="Email"
+                  type="email"
+                  variant="outlined"
+                  :rules="[required, emailRule]"
+                  class="mb-4"
+                ></v-text-field>
+  
+                <v-alert
+                  v-if="error"
+                  type="error"
+                  variant="tonal"
+                  class="mb-4"
+                >
+                  {{ error }}
+                </v-alert>
+  
+                <div class="d-flex justify-center">
+                  <v-btn
+                    type="submit"
+                    color="primary"
+                    :loading="isLoading"
+                    class="mr-4"
+                  >
+                    Mentés
+                  </v-btn>
+                  <v-btn
+                    @click="cancelEditing"
+                    variant="outlined"
+                  >
+                    Mégse
+                  </v-btn>
                 </div>
-
-                <div class="flex justify-center pt-8">
-                    <button @click="handleLogout"
-                        class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                        Kijelentkezés
-                    </button>
+              </v-form>
+  
+              <v-form v-if="isChangingPassword" @submit.prevent="handlePasswordChange">
+                <v-text-field
+                  v-model="passwordForm.currentPassword"
+                  label="Jelenlegi jelszó"
+                  type="password"
+                  variant="outlined"
+                  :rules="[required]"
+                  class="mb-4"
+                ></v-text-field>
+  
+                <v-text-field
+                  v-model="passwordForm.newPassword"
+                  label="Új jelszó"
+                  type="password"
+                  variant="outlined"
+                  :rules="[required, minLength]"
+                  class="mb-4"
+                ></v-text-field>
+  
+                <v-alert
+                  v-if="error"
+                  type="error"
+                  variant="tonal"
+                  class="mb-4"
+                >
+                  {{ error }}
+                </v-alert>
+  
+                <div class="d-flex justify-center">
+                  <v-btn
+                    type="submit"
+                    color="green"
+                    :loading="isLoading"
+                    class="mr-4"
+                  >
+                    Jelszó módosítása
+                  </v-btn>
+                  <v-btn
+                    @click="cancelPasswordChange"
+                    variant="outlined"
+                  >
+                    Mégse
+                  </v-btn>
                 </div>
+              </v-form>
+            </template>
+  
+            <div class="text-center mt-8">
+              <v-btn
+                @click="handleLogout"
+                color="red"
+                prepend-icon="mdi-logout"
+                size="large"
+              >
+                Kijelentkezés
+              </v-btn>
             </div>
-        </div>
-    </div>
-</template>
-
-<script setup lang="ts">
-import { ref } from 'vue'
-import { useAuthStore } from '@/stores/auth'
-import { useRouter } from 'vue-router'
-
-const authStore = useAuthStore()
-const router = useRouter()
-
-const isEditing = ref(false)
-const isChangingPassword = ref(false)
-const isLoading = ref(false)
-const error = ref('')
-
-const editForm = ref({
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+  </template>
+  
+  <script setup lang="ts">
+  import { ref } from 'vue'
+  import { useAuthStore } from '@/stores/auth'
+  import { useRouter } from 'vue-router'
+  
+  const authStore = useAuthStore()
+  const router = useRouter()
+  
+  const isEditing = ref(false)
+  const isChangingPassword = ref(false)
+  const isLoading = ref(false)
+  const error = ref('')
+  
+  const editForm = ref({
     name: authStore.user?.name || '',
     email: authStore.user?.email || ''
-})
-
-const passwordForm = ref({
+  })
+  
+  const passwordForm = ref({
     currentPassword: '',
     newPassword: ''
-})
-
-const startEditing = () => {
+  })
+  
+  const required = (value: string) => !!value || 'Kötelező mező'
+  const emailRule = (value: string) => {
+    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return pattern.test(value) || 'Érvényes email cím szükséges'
+  }
+  const minLength = (value: string) => value.length >= 6 || 'Legalább 6 karakter szükséges'
+  
+  const startEditing = () => {
     editForm.value = {
-        name: authStore.user?.name || '',
-        email: authStore.user?.email || ''
+      name: authStore.user?.name || '',
+      email: authStore.user?.email || ''
     }
     isEditing.value = true
     isChangingPassword.value = false
     error.value = ''
-}
-
-const cancelEditing = () => {
+  }
+  
+  const cancelEditing = () => {
     isEditing.value = false
     error.value = ''
-}
-
-const handleProfileUpdate = async () => {
+  }
+  
+  const handleProfileUpdate = async () => {
     try {
-        error.value = ''
-        isLoading.value = true
-
-        const result = await authStore.updateProfile(editForm.value)
-
-        if (result.success) {
-            isEditing.value = false
-        } else {
-            error.value = result.error
-        }
+      error.value = ''
+      isLoading.value = true
+      const result = await authStore.updateProfile(editForm.value)
+      if (result.success) {
+        isEditing.value = false
+      } else {
+        error.value = 'Hiba történt a frissítés során'
+      }
     } catch (e) {
-        error.value = 'Váratlan hiba történt a profil frissítésekor'
+      error.value = 'Váratlan hiba történt a profil frissítésekor'
     } finally {
-        isLoading.value = false
+      isLoading.value = false
     }
-}
-
-const startPasswordChange = () => {
+  }
+  
+  const startPasswordChange = () => {
     passwordForm.value = {
-        currentPassword: '',
-        newPassword: ''
+      currentPassword: '',
+      newPassword: ''
     }
     isChangingPassword.value = true
     isEditing.value = false
     error.value = ''
-}
-
-const cancelPasswordChange = () => {
+  }
+  
+  const cancelPasswordChange = () => {
     isChangingPassword.value = false
     error.value = ''
-}
-
-const handlePasswordChange = async () => {
+  }
+  
+  const handlePasswordChange = async () => {
     try {
-        error.value = ''
-        isLoading.value = true
-
-        const result = await authStore.changePassword(passwordForm.value)
-
-        if (result.success) {
-            isChangingPassword.value = false
-            passwordForm.value = {
-                currentPassword: '',
-                newPassword: ''
-            }
-        } else {
-            error.value = result.error
-        }
+      error.value = ''
+      isLoading.value = true
+      const result = await authStore.changePassword(passwordForm.value)
+      if (result.success) {
+        isChangingPassword.value = false
+        passwordForm.value = { currentPassword: '', newPassword: '' }
+      } else {
+        error.value = 'Hibás jelenlegi jelszó'
+      }
     } catch (e) {
-        error.value = 'Váratlan hiba történt a jelszó módosításakor'
+      error.value = 'Váratlan hiba történt a jelszó módosításakor'
     } finally {
-        isLoading.value = false
+      isLoading.value = false
     }
-}
-
-const handleLogout = () => {
+  }
+  
+  const handleLogout = () => {
     authStore.logout()
     router.push('/login')
-}
-</script>
+  }
+  </script>
+  
+  <style scoped>
+  .v-card {
+    transition: all 0.3s ease;
+  }
+  </style>

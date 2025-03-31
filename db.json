@@ -16,7 +16,13 @@
       "id": 1739994356911,
       "name": "Gipsz Jakab",
       "email": "gipsz@jakab.com",
-      "password": "$2a$08$t.nwEN1VOsXuxX0HfY5qoetRn/njz.PcMDHNo7VbI.5U0MOoZUzIC"
+      "password": "$2a$08$jgjSuzLom0ApCyV6pmgWYe7D0G.B3hbqScDWRecP.v1gj4sPVhvQy"
+    },
+    {
+      "id": 1743447578400,
+      "name": "barni",
+      "email": "barni@gmail.com",
+      "password": "$2a$08$X129m3HJtejCkFaK/yz4TO3k50d4btb9jqBLmnszM70oHqYCOxY.q"
     }
   ],
   "posts": [
@@ -25,7 +31,7 @@
       "subtitle": "cica",
       "description": "a szöszmösz",
       "content": "makka",
-      "picture": "https://cdn.discordapp.com/attachments/863114414215135264/1341564355195441234/IMG_5047.jpg?ex=67b71d6b&is=67b5cbeb&hm=35d2bb55ec13a625b79274c93338e7d895b31fe9cd182651086859bccf83c8a6&",
+      "picture": "https://cdn.discordapp.com/attachments/863114414215135264/1353073315115434054/IMG_5138.jpg?ex=67ec30b9&is=67eadf39&hm=cc77f321fb33eefd82bf4fc69bc5fd094de2added54cbeff07c4ff011befb52a&",
       "category": "cat",
       "author": "John Doe",
       "email": "john@doe.com",
@@ -36,7 +42,7 @@
       "subtitle": "bub",
       "description": "a bububub",
       "content": "makka",
-      "picture": "https://cdn.discordapp.com/attachments/863114414215135264/1341413602623619135/IMG_5046.jpg?ex=67b739c5&is=67b5e845&hm=7030902c47ea13282ec3a83eb250e850e7677745efa338c8d13ec3b1b5644ffa&",
+      "picture": "https://cdn.discordapp.com/attachments/863114414215135264/1356324528263004494/IMG_5189.jpg?ex=67ec2726&is=67ead5a6&hm=e77400b32ff76e303671d6edd6a8420c697b44eb16abdd55a5c39ae9c844c5dd&",
       "category": "cat",
       "author": "John Doe",
       "email": "john@doe.com",
@@ -47,7 +53,7 @@
       "subtitle": "gyanús fóka elkapva",
       "description": "Őrizetbe fogták a helyi fókát",
       "content": "2025.02.18 Kedd reggel a helyi hatóságok őrizetbe fogták a fókát",
-      "picture": "https://cdn.discordapp.com/attachments/863114414215135264/1341467061716516864/20250218_182610.jpg?ex=67b76b8e&is=67b61a0e&hm=5e78c30e405d27ca2d9ed21dc31352bea43b68395b8fff6dfb3c794923a6437a&",
+      "picture": "https://cdn.discordapp.com/attachments/863114414215135264/1341467061716516864/20250218_182610.jpg?ex=67ec278e&is=67ead60e&hm=e245a31345e4e2dac4c467e79c7cadcce1571f21d4b509e6c484e5c50b6fc1ba&",
       "category": "foka",
       "author": "Gipsz Jakab",
       "email": "gipsz@jakab.com",
@@ -58,7 +64,7 @@
       "subtitle": "kiderítik valós szándékait az elkapott fókának",
       "description": "Az elfogott fókát kihallgatják a hatóságok",
       "content": "A kedd reggel őrizetbe fogott fókát a hatóságok jelenleg kihallgatás alá helyezték",
-      "picture": "https://cdn.discordapp.com/attachments/863114414215135264/1341429508720558152/20250218_114251.jpg?ex=67b74895&is=67b5f715&hm=9d987fd5aba64e625d0d3e2b76fd999bc82d0f89aa807369753045b42772a2df&",
+      "picture": "https://cdn.discordapp.com/attachments/863114414215135264/1341405848001577010/20250218_114251.jpg?ex=67ebee8c&is=67ea9d0c&hm=8bbabbe71a760024a12f599dbba693142cdf0ba1c7e964d3ea485b383e11bd37&",
       "category": "foka",
       "author": "Gipsz Jakab",
       "email": "gipsz@jakab.com",

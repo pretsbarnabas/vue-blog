@@ -1,95 +1,90 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Navigációs sáv -->
-    <nav class="bg-white shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-center h-16 items-center space-x-4">
-          <RouterLink 
-            to="/" 
-            class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-            :class="{ 'text-indigo-600 font-semibold': $route.path === '/' }"
+  <v-app>
+    <!-- App Bar -->
+    <v-app-bar color="secondary" density="compact">
+      <v-container class="d-flex align-center">
+        <v-btn
+          v-for="link in mainLinks"
+          :key="link.to"
+          :to="link.to"
+          variant="text"
+          :active="$route.path === link.to"
+          class="mx-1"
+        >
+          {{ link.text }}
+        </v-btn>
+
+        <v-divider vertical class="mx-2"></v-divider>
+
+        <template v-if="!authStore.isAuthenticated">
+          <v-btn
+            v-for="link in guestLinks"
+            :key="link.to"
+            :to="link.to"
+            variant="text"
+            :active="$route.path === link.to"
+            class="mx-1"
           >
-            Kezdőlap
-          </RouterLink>
+            {{ link.text }}
+          </v-btn>
+        </template>
 
-          <span class="text-gray-300">|</span>
-          <RouterLink 
-            to="/posts" 
-            class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-            :class="{ 'text-indigo-600 font-semibold': $route.path === '/posts' }"
+        <template v-else>
+          <v-btn
+            v-for="link in authLinks"
+            :key="link.to"
+            :to="link.to"
+            variant="text"
+            :active="$route.path === link.to"
+            class="mx-1"
           >
-            Posts
-          </RouterLink>
+            {{ link.text }}
+          </v-btn>
+        </template>
+      </v-container>
+    </v-app-bar>
 
-
-          <span class="text-gray-300">|</span>
-          <RouterLink 
-            to="/categories" 
-            class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-            :class="{ 'text-indigo-600 font-semibold': $route.path === '/categories' }"
-          >
-            Categories
-          </RouterLink>
-
-          
-
-          <template v-if="!authStore.isAuthenticated">
-            <span class="text-gray-300">|</span>
-            <RouterLink 
-              to="/login" 
-              class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              :class="{ 'text-indigo-600 font-semibold': $route.path === '/login' }"
-            >
-              Bejelentkezés
-            </RouterLink>
-
-
-
-            <span class="text-gray-300">|</span>
-            <RouterLink 
-              to="/register" 
-              class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              :class="{ 'text-indigo-600 font-semibold': $route.path === '/register' }"
-            >
-              Regisztráció
-            </RouterLink>
-          </template>
-
-          <template v-else>
-            <span class="text-gray-300">|</span>
-            <RouterLink 
-              to="/new-post" 
-              class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              :class="{ 'text-indigo-600 font-semibold': $route.path === '/new-post' }"
-            >
-              New Post
-            </RouterLink>  
-            <span class="text-gray-300">|</span>
-            <RouterLink 
-              to="/profile" 
-              class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              :class="{ 'text-indigo-600 font-semibold': $route.path === '/profile' }"
-            >
-              Profil
-            </RouterLink>
-
-          </template>
-        </div>
-      </div>
-    </nav>
-
-    <!-- Fő tartalom -->
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-      <div class="px-4 py-6 sm:px-0">
-        <RouterView />
-      </div>
-    </main>
-  </div>
+    <!-- Main Content -->
+    <v-main>
+      <v-container>
+        <router-view v-slot="{ Component }">
+          <v-fade-transition mode="out-in">
+            <component :is="Component" />
+          </v-fade-transition>
+        </router-view>
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
+const $route = useRoute()
+
+const mainLinks = ref([
+  { to: '/', text: 'Kezdőlap' },
+  { to: '/posts', text: 'Posts' },
+  { to: '/categories', text: 'Categories' }
+])
+
+const guestLinks = ref([
+  { to: '/login', text: 'Bejelentkezés' },
+  { to: '/register', text: 'Regisztráció' }
+])
+
+const authLinks = ref([
+  { to: '/new-post', text: 'New Post' },
+  { to: '/profile', text: 'Profil' }
+])
 </script>
+
+<style scoped>
+.v-btn--active {
+  font-weight: 600;
+  color: rgb(var(--v-theme-primary)) !important;
+}
+</style>

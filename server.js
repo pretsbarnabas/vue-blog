@@ -42,6 +42,7 @@ function verifyToken(req, res, next) {
   });
 }
 
+
 // Register endpoint
 server.post('/register', (req, res) => {
   const { name, email, password } = req.body

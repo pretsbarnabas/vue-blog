@@ -1,127 +1,161 @@
+// stores/auth.ts
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import axios from 'axios'
+import { reactive, computed, toRefs } from 'vue'
+import api from "@/main"
 import type {
-  AuthState,
-  User,
   LoginCredentials,
   RegisterCredentials,
   AuthResponse,
-} from '../types/auth'
+  AuthState,
+} from '@/types/auth'
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref<User | null>(null)
-  const token = ref<string | null>(null)
+  const state = reactive<AuthState>({
+    user: null,
+    token: null,
+    isAuthenticated: computed(() => !!state.token),
+    loading: false,
+    error: null
+  })
 
-  const isAuthenticated = computed(() => !!token.value)
-
-  // Token kezelés
   const setToken = (newToken: string | null) => {
-    token.value = newToken
+    state.token = newToken
     if (newToken) {
       localStorage.setItem('token', newToken)
-      axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
+      api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
     } else {
       localStorage.removeItem('token')
-      delete axios.defaults.headers.common['Authorization']
+      delete api.defaults.headers.common['Authorization']
     }
-    console.log(localStorage.getItem("token"))
   }
 
-  // Token inicializálása
   const initializeAuth = () => {
     const savedToken = localStorage.getItem('token')
-    if (savedToken) {
-      setToken(savedToken)
-    }
+    if (savedToken) setToken(savedToken)
   }
 
-  // Bejelentkezés
-  const login = async (credentials: LoginCredentials) => {
+  const authAction = async <T>(
+    url: string,
+    credentials: T,
+    successMessage: string
+  ) => {
+    state.loading = true
+    state.error = null
+    
     try {
-      const response = await axios.post<AuthResponse>('http://localhost:3000/login', credentials)
-      setToken(response.data.token)
-      user.value = response.data.user
-      return { success: true }
-    } catch (error: any) {
-      setToken(null)
-      user.value = null
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Bejelentkezési hiba történt',
+      const { data } = await api.post<AuthResponse>(url, credentials)
+      setToken(data.token)
+      state.user = data.user
+      
+      return { 
+        success: true, 
+        message: successMessage,
+        user: data.user
       }
+    } catch (error: any) {
+      state.error = {
+        message: error.response?.data?.message || 'Authentication failed',
+        fields: error.response?.data?.errors
+      }
+      return { success: false }
+    } finally {
+      state.loading = false
     }
   }
 
-  // Regisztráció
-  const register = async (credentials: RegisterCredentials) => {
-    try {
-      const response = await axios.post<AuthResponse>('http://localhost:3000/register', credentials)
-      setToken(response.data.token)
-      user.value = response.data.user
-      return { success: true }
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Regisztrációs hiba történt',
-      }
-    }
-  }
-
-  // Kijelentkezés
-  const logout = () => {
-    user.value = null
-    setToken(null)
-  }
-
-  // Profil frissítése
   const updateProfile = async (updateData: { name: string; email: string }) => {
+    state.loading = true
+    state.error = null
+    
     try {
-      if (!user.value?.id) throw new Error('Nincs bejelentkezett felhasználó')
-
-      const response = await axios.put('http://localhost:3000/profile/update', {
-        id: user.value.id,
-        ...updateData,
+      const userId = state.user?.id
+      if (!userId) throw new Error('User not authenticated')
+  
+      console.log('Sending profile update:', {
+        id: userId, 
+        name: updateData.name,
+        email: updateData.email
       })
-
-      user.value = response.data.user
-      return { success: true }
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Hiba történt a profil frissítésekor',
+  
+      const { data } = await api.put('/profile/update', {
+        id: userId, 
+        name: updateData.name,
+        email: updateData.email
+      })
+  
+      if (state.user) {
+        state.user.name = data.user.name
+        state.user.email = data.user.email
       }
+  
+      return { 
+        success: true,
+        user: data.user,
+        message: 'Profile updated successfully'
+      }
+    } catch (error: any) {
+      console.error('Profile update error:', error.response?.data)
+      state.error = {
+        message: error.response?.data?.message || 'Profile update failed',
+        fields: error.response?.data?.errors
+      }
+      return { success: false }
+    } finally {
+      state.loading = false
     }
   }
-
-
-  // Jelszó változtatás
-  const changePassword = async (passwords: { currentPassword: string; newPassword: string }) => {
+  const changePassword = async (passwords: { 
+    currentPassword: string; 
+    newPassword: string 
+  }) => {
+    state.loading = true
+    state.error = null
+    
     try {
-      if (!user.value?.id) throw new Error('Nincs bejelentkezett felhasználó')
-
-      const response = await axios.put('http://localhost:3000/profile/change-password', {
-        id: user.value.id,
-        ...passwords,
+      const userId = state.user?.id
+      if (!userId) throw new Error('User not authenticated')
+      console.log('Password change payload:', {
+        id: userId,
+        currentPassword: '***', 
+        newPassword: '***'
       })
 
-      return { success: true }
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Hiba történt a jelszó módosításakor',
+      const { data } = await api.put('/profile/change-password', {
+        id: userId,
+        currentPassword: passwords.currentPassword,
+        newPassword: passwords.newPassword
+      })
+
+      return { 
+        success: true,
+        message: 'Password changed successfully'
       }
+    } catch (error: any) {
+      console.error('Password change error:', error.response?.data)
+      state.error = {
+        message: error.response?.data?.message || 'Password change failed',
+        fields: error.response?.data?.errors
+      }
+      return { 
+        success: false,
+        error: error.response?.data 
+      }
+    } finally {
+      state.loading = false
     }
   }
 
   return {
-    user,
-    token,
-    isAuthenticated,
-    login,
-    register,
-    logout,
+    ...toRefs(state),
     initializeAuth,
+    login: (credentials: LoginCredentials) => 
+      authAction('/login', credentials, 'Successfully logged in'),
+    register: (credentials: RegisterCredentials) => 
+      authAction('/register', credentials, 'Registration successful'),
+    logout: () => {
+      state.user = null
+      setToken(null)
+    },
     updateProfile,
     changePassword
   }

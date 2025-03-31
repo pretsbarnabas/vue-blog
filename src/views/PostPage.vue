@@ -1,27 +1,85 @@
 <template>
-  <div class="container mx-auto px-4" v-if="post">
-    <h1 class="text-4xl font-bold my-4">{{ post.title }}</h1>
-    <p class="text-xl text-gray-500 mb-2">{{ post.subtitle }}</p>
-    <img v-if="post.picture" :src="post.picture" alt="Post image" class="w-full rounded mb-4" />
-    <div class="prose" v-html="post.content"></div>
-    <div class="mt-4 text-sm">
-      <span>Category:
-        <router-link :to="`/categories/${post.category}`" class="text-blue-500 hover:underline">
-          {{ post.category }}
-        </router-link>
-      </span>
-      <br />
-      <span>Author: {{ post.author }}</span>
-    </div>
-    
-    <div v-if="isCreator" class="mt-4">
-      <button @click="editPost" class="mr-4 bg-green-500 text-white px-3 py-1 rounded">Edit</button>
-      <button @click="deletePost" class="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
-    </div>
-  </div>
-  <div v-else class="container mx-auto px-4">
-    <p>Loading post...</p>
-  </div>
+  <v-container>
+    <template v-if="post">
+      <v-row>
+        <v-col cols="12">
+          <v-card-title class="text-h2 font-weight-bold">{{ post.title }}</v-card-title>
+          <v-card-subtitle class="text-h5 text-grey-darken-1">{{ post.subtitle }}</v-card-subtitle>
+        </v-col>
+      </v-row>
+
+      <v-row>
+        <v-col cols="12">
+          <v-img
+            v-if="post.picture"
+            :src="post.picture"
+            :alt="post.title"
+            class="rounded-lg mb-4 content-center items-center"
+            max-height="720"
+            max-width="480"
+            cover
+          ></v-img>
+        </v-col>
+      </v-row>
+
+      <v-row>
+        <v-col cols="12">
+          <v-card-text class="prose" v-html="post.content"></v-card-text>
+        </v-col>
+      </v-row>
+
+      <v-row>
+        <v-col cols="12">
+          <v-chip-group>
+            <v-chip
+              :to="`/categories/${post.category}`"
+              variant="outlined"
+              color="primary"
+              size="small"
+            >
+              {{ post.category }}
+            </v-chip>
+            <v-chip variant="text" size="small">
+              <v-icon start>mdi-account</v-icon>
+              {{ post.author }}
+            </v-chip>
+          </v-chip-group>
+        </v-col>
+      </v-row>
+
+      <v-row v-if="isCreator">
+        <v-col cols="12" class="d-flex">
+          <v-btn
+            @click="editPost"
+            color="green"
+            variant="flat"
+            class="mr-4"
+            prepend-icon="mdi-pencil"
+          >
+            Edit
+          </v-btn>
+          <v-btn
+            @click="deletePost"
+            color="red"
+            variant="flat"
+            prepend-icon="mdi-delete"
+          >
+            Delete
+          </v-btn>
+        </v-col>
+      </v-row>
+    </template>
+
+    <v-row v-else>
+      <v-col cols="12" class="text-center">
+        <v-progress-circular
+          indeterminate
+          color="primary"
+          size="64"
+        ></v-progress-circular>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -46,8 +104,9 @@ onMounted(async () => {
 const post = computed(() => postsStore.posts.find(p => p.id === postId))
 
 const isCreator = computed(() => {
-  if(!authStore.user) return false
-  if(post.value && authStore.user.email.trim() == post.value.email.trim()) return true
+  if (!authStore.user) return false
+  if (post.value && authStore.user.email?.trim() === post.value.email?.trim()) return true
+  return false
 })
 
 const editPost = () => {
@@ -56,10 +115,27 @@ const editPost = () => {
 
 const deletePost = async () => {
   try {
-    await postsStore.deletePost(postId)
     router.push('/posts')
+    await postsStore.deletePost(postId)
   } catch (error) {
-    console.error('Error deleting post:', error)
   }
 }
 </script>
+
+<style scoped>
+.prose :deep(*) {
+  max-width: 100%;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+.prose :deep(h2) {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 2rem;
+}
+.prose :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+</style>

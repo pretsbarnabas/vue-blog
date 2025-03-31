@@ -7,5 +7,6 @@ export interface Post {
     picture?: string;
     category?: string;
     author: string;
+    email: string
   }
   
